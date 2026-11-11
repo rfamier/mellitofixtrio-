@@ -1,0 +1,319 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================================================
+   BASE — warm paper background, refined type, selection
+   ========================================================= */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply text-ink-900 font-sans antialiased;
+    background-color: theme('colors.cream.100');
+    /* soft gold + sky glows on the cream "paper" */
+    background-image:
+      radial-gradient(60rem 40rem at 100% -10%, rgb(197 166 106 / 0.16), transparent 60%),
+      radial-gradient(50rem 35rem at -10% 110%, rgb(94 148 174 / 0.10), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  /* fine paper grain over everything (very subtle, non-interactive) */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: theme('colors.gold.200');
+    color: theme('colors.ink.900');
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.gold.500');
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* slim, warm scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.cream.400') transparent;
+  }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-thumb {
+    background: theme('colors.cream.400');
+    border-radius: 999px;
+    border: 3px solid theme('colors.cream.100');
+  }
+  *::-webkit-scrollbar-thumb:hover { background: theme('colors.gold.400'); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* =========================================================
+   COMPONENTS — same class names, upgraded look
+   ========================================================= */
+@layer components {
+  /* Primary: deep ink with a gold sheen that sweeps across on hover */
+  .btn-primary {
+    @apply relative overflow-hidden inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-ink-900 text-cream-50 font-medium rounded-full shadow-soft
+           transition-all duration-300 ease-out
+           hover:bg-ink-800 hover:shadow-lift hover:-translate-y-0.5
+           active:translate-y-0 active:scale-[0.98]
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 1px 2px rgb(37 43 43 / 0.08),
+      0 4px 12px -4px rgb(37 43 43 / 0.25);
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgb(223 198 143 / 0.35) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+  .btn-primary:hover::after { transform: translateX(120%); }
+  .btn-primary:disabled::after { display: none; }
+
+  /* Secondary: cream "paper" button with a gold edge on hover */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3
+           bg-white/80 backdrop-blur-sm text-ink-900 font-medium rounded-full
+           border border-ink-200 shadow-soft
+           transition-all duration-300 ease-out
+           hover:bg-white hover:border-gold-400 hover:text-ink-900 hover:shadow-lift hover:-translate-y-0.5
+           active:translate-y-0 active:scale-[0.98]
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400 focus-visible:ring-offset-2 focus-visible:ring-offset-cream-100;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-ink-700 font-medium rounded-full
+           transition-all duration-200 ease-out
+           hover:bg-gold-50 hover:text-ink-900
+           active:scale-[0.97]
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-400;
+  }
+
+  /* Cards: layered warm shadow, faint inner highlight */
+  .card {
+    @apply bg-white rounded-2xl border border-cream-300/70 shadow-soft
+           transition-all duration-300 ease-out;
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.9),
+      0 1px 2px rgb(61 58 51 / 0.04),
+      0 8px 24px -12px rgb(61 58 51 / 0.12);
+  }
+
+  /* Hoverable cards: lift + a gold hairline that draws in on top */
+  .card-hover {
+    @apply relative hover:-translate-y-1 hover:border-gold-300;
+  }
+  .card-hover::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 24px;
+    right: 24px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, theme('colors.gold.500'), transparent);
+    transform: scaleX(0);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .card-hover:hover {
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.9),
+      0 2px 4px rgb(61 58 51 / 0.04),
+      0 24px 48px -20px rgb(61 58 51 / 0.25);
+  }
+  .card-hover:hover::before { transform: scaleX(1); }
+
+  /* Inputs: soft cream fill that brightens with a gold focus glow */
+  .input-field {
+    @apply w-full px-4 py-3 bg-cream-50 border border-cream-300 rounded-xl text-ink-900 placeholder-ink-300
+           transition-all duration-200
+           hover:border-cream-400
+           focus:outline-none focus:bg-white focus:border-gold-500;
+  }
+  .input-field:focus {
+    box-shadow: 0 0 0 4px rgb(197 166 106 / 0.18);
+  }
+
+  .input-label {
+    @apply block text-xs font-semibold text-ink-600 uppercase tracking-wider mb-2;
+  }
+
+  .input-error {
+    @apply border-red-400 focus:border-red-500;
+  }
+  .input-error:focus {
+    box-shadow: 0 0 0 4px rgb(239 68 68 / 0.15);
+  }
+
+  .section-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-max {
+    @apply max-w-7xl mx-auto section-padding;
+  }
+
+  /* Nav: gold underline that grows from the centre */
+  .nav-link {
+    @apply relative px-3 py-2 text-sm font-medium text-ink-500 transition-colors duration-200 hover:text-ink-900;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    right: 50%;
+    height: 2px;
+    border-radius: 999px;
+    background: theme('colors.gold.500');
+    transition: left 0.3s ease, right 0.3s ease;
+  }
+  .nav-link:hover::after {
+    left: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .nav-link-active {
+    @apply text-ink-900;
+  }
+  .nav-link-active::after {
+    left: 0.75rem;
+    right: 0.75rem;
+  }
+
+  /* ---------- New optional helpers (use anywhere) ---------- */
+
+  /* Small pill label, e.g. above headings: <span className="eyebrow">World Diabetes Day</span> */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full
+           bg-gold-50 border border-gold-200 text-gold-800
+           text-xs font-semibold uppercase tracking-[0.14em];
+  }
+
+  /* Gold gradient text for a key word: <em className="text-gold-gradient">Challenge</em> */
+  .text-gold-gradient {
+    @apply italic;
+    background: linear-gradient(100deg, theme('colors.gold.700'), theme('colors.gold.500') 45%, theme('colors.gold.700'));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Decorative divider: <div className="divider-ornament" /> */
+  .divider-ornament {
+    @apply flex items-center gap-4 my-8 text-gold-500;
+  }
+  .divider-ornament::before,
+  .divider-ornament::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, theme('colors.gold.300'), transparent);
+  }
+
+  /* Frosted panel, e.g. a sticky header: className="glass" */
+  .glass {
+    @apply bg-cream-50/70 backdrop-blur-md border-b border-cream-300/60;
+  }
+
+  /* Gold button for dark (ink) backgrounds */
+  .btn-gold {
+    @apply relative overflow-hidden inline-flex items-center justify-center gap-2 px-7 py-3.5
+           bg-gold-400 text-ink-900 font-semibold rounded-full
+           transition-all duration-300 ease-out
+           hover:bg-gold-300 hover:-translate-y-0.5
+           active:translate-y-0 active:scale-[0.98]
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900;
+    box-shadow: 0 10px 30px -10px rgb(197 166 106 / 0.6);
+  }
+
+  /* Deep ink panel with soft gold + sky glows */
+  .ink-panel {
+    @apply relative overflow-hidden bg-ink-900 text-cream-100;
+    background-image:
+      radial-gradient(40rem 22rem at 90% -10%, rgb(197 166 106 / 0.24), transparent 60%),
+      radial-gradient(32rem 22rem at -10% 110%, rgb(94 148 174 / 0.24), transparent 60%);
+  }
+
+  /* Faint dotted grid backdrop */
+  .dot-grid {
+    background-image: radial-gradient(rgb(37 43 43 / 0.09) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .dot-grid-light {
+    background-image: radial-gradient(rgb(243 239 229 / 0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 95%);
+    mask-image: linear-gradient(to bottom, black 30%, transparent 95%);
+  }
+
+  /* Cursor-following gold light — set --mx/--my from JS */
+  .spotlight {
+    position: relative;
+  }
+  .spotlight::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(22rem circle at var(--mx, 50%) var(--my, 50%), rgb(197 166 106 / 0.16), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .spotlight:hover::after {
+    opacity: 1;
+  }
+
+  /* Status notice boxes */
+  .notice-error {
+    @apply flex items-start gap-2.5 p-4 rounded-xl border border-red-200 bg-red-50 text-sm text-red-700 animate-slide-down;
+  }
+}
+
+@layer utilities {
+  .reveal-hidden {
+    opacity: 0;
+  }
+}
