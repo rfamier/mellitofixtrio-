@@ -87,7 +87,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
           >
             <span className="relative">
               <img
-                src="/images/eva.jpg"
+                src="/images/eva_black.png"
                 alt="Eva Pharma logo"
                 className="h-10 w-auto rounded-lg ring-1 ring-cream-300 shadow-soft transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-3"
               />

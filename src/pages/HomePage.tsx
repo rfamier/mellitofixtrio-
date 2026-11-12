@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Award,
   Stethoscope,
+  Ribbon,
 } from 'lucide-react';
 import type { PageId } from '@/types/router';
 import Reveal from '@/components/Reveal';
@@ -59,21 +60,20 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center pt-10 pb-20 lg:pt-16 lg:pb-28">
             {/* Copy */}
             <div className="lg:col-span-7">
-              <Reveal direction="up">
-                <div className="eyebrow mb-7">
-                  <span className="relative flex w-2 h-2">
-                    <span className="absolute inset-0 rounded-full bg-gold-500 animate-ping opacity-60" />
-                    <span className="relative w-2 h-2 rounded-full bg-gold-500" />
-                  </span>
-                  World Diabetes Day &middot; November 14
-                </div>
+  <Reveal direction="up">
+    <div className="inline-flex items-center gap-2 px-3 py-1 mb-7 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs font-semibold uppercase tracking-[0.14em]">
+      <span className="relative flex w-2 h-2">
+        <span className="absolute inset-0 rounded-full bg-sky-500 animate-ping opacity-60" />
+        <span className="relative w-2 h-2 rounded-full bg-sky-500" />
+      </span>
+      World Diabetes Day &middot; November 14
+    </div>
               </Reveal>
 
               <Reveal direction="up" delay={80}>
                 <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold text-ink-900 leading-[1.05] mb-7">
-                  From Initiation to{' '}
+                  From Initiation to Intensification{' '}
                   <span className="relative inline-block">
-                    <span className="text-gold-gradient">Intensification</span>
                     {/* hand-drawn underline */}
                     <svg
                       aria-hidden
@@ -206,11 +206,11 @@ function HeroVisual() {
         <span className="absolute left-1/2 top-[2.5%] -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-gold-500 shadow-[0_0_0_6px_rgba(197,166,106,0.22)]" />
       </div>
 
-      {/* centre */}
+            {/* centre */}
       <div className="absolute inset-[31%]">
-        <span className="absolute inset-0 rounded-full border-2 border-gold-400 animate-pulse-ring" />
+        <span className="absolute inset-0 rounded-full border-2 border-sky-400 animate-pulse-ring" />
         <div className="relative w-full h-full rounded-full bg-ink-900 shadow-lift flex items-center justify-center">
-          <Stethoscope className="w-1/3 h-1/3 text-gold-300" strokeWidth={1.5} />
+                    <Ribbon className="w-1/2 h-1/2 text-sky-300" strokeWidth={2.25} />
         </div>
       </div>
 

@@ -116,9 +116,10 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
             Admin Login
           </h1>
           <p className="text-ink-600">
-            Sign in to manage the World Diabetes Day challenge and leaderboard.
+            Sign in to manage the questions and leaderboard.
           </p>
         </div>
+        
 
         <form onSubmit={handleSubmit} className="card p-8 space-y-5">
           <div>

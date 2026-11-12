@@ -44,8 +44,7 @@ const products: ProductItem[] = [
     title: 'Thiotacid Liposomal',
     description:
       'Thiotacid Liposomal is the First Alpha Lipoic Acid with Liposomal Technology in the Egyptian Market with Enhanced Bioavailability, Extra Gastric Comfort & Better Patient Compliance.',
-    images: [{ src: '/images/products/thiotacid_portfolio.webp', label: 'Thiotacid Liposomal' }],
-    imageStyle: 'photo',
+    images: [{ src: '/images/products/thiotacid-liposomal.png', label: 'Thiotacid Liposomal' }],
   },
 ];
 
@@ -54,8 +53,8 @@ export default function PortfolioPage() {
     <div>
       <PageHero
         icon={Package}
-        title="Eva's Diabetes Portfolio"
-        description="A curated selection of products supporting better diabetes care, from initiation to intensification."
+        title="Our Portfolio"
+        description="Supporting better diabetes care, from initiation to intensification."
       />
 
       <section className="container-max py-14 lg:py-20">
@@ -129,9 +128,6 @@ function ProductCard({ product, index }: { product: ProductItem; index: number }
       <div className="spotlight card group h-full overflow-hidden flex flex-col transition-[transform,box-shadow,border-color] duration-300 ease-out [transform:rotateX(var(--rx,0deg))_rotateY(var(--ry,0deg))] hover:shadow-lift hover:border-gold-300">
         {/* Visual */}
         <div className="aspect-[4/3] relative overflow-hidden flex-shrink-0 bg-gradient-to-br from-cream-50 via-cream-100 to-gold-50">
-          <span className="absolute top-4 left-4 z-20 font-serif italic text-sm text-gold-700 bg-white/80 backdrop-blur rounded-full px-3 py-1 border border-gold-200 shadow-soft">
-            {String(index + 1).padStart(2, '0')}
-          </span>
 
           {/* decorative rings behind the pack */}
           {!isPhoto && (
