@@ -8,9 +8,10 @@ import {
   MapPin,
   AlertCircle,
   Loader2,
+  Timer,
 } from 'lucide-react';
 import Reveal from '@/components/Reveal';
-import { CHALLENGE_QUESTION_COUNT } from '@/lib/supabase';
+import { CHALLENGE_QUESTION_COUNT, QUESTION_TIME_SECONDS } from '@/lib/supabase';
 
 export type ParticipantFormData = {
   fullName: string;
@@ -21,7 +22,7 @@ export type ParticipantFormData = {
 
 export type ParticipantFormErrors = Partial<Record<keyof ParticipantFormData, string>>;
 
-export type FormNotice = 'taken' | 'check_failed' | null;
+export type FormNotice = 'taken' | 'phone_taken' | 'check_failed' | null;
 
 type ParticipantFormProps = {
   formData: ParticipantFormData;
@@ -71,6 +72,9 @@ export default function ParticipantForm({
         {notice === 'taken' && (
           <Notice>This email has already completed the challenge. Each participant can take it once.</Notice>
         )}
+        {notice === 'phone_taken' && (
+          <Notice>This phone number has already completed the challenge. Each participant can take it once.</Notice>
+        )}
         {notice === 'check_failed' && (
           <Notice>We could not verify your entry. Please check your connection and try again.</Notice>
         )}
@@ -103,7 +107,12 @@ export default function ParticipantForm({
               </div>
 
               {/* one marker per question */}
-              <div className="relative mt-10 lg:mt-auto pt-6 flex items-center gap-2">
+              <div className="relative mt-10 lg:mt-auto pt-6">
+              <p className="flex items-center gap-2 text-sm text-gold-300 mb-3">
+                <Timer className="w-4 h-4" />
+                {QUESTION_TIME_SECONDS} seconds per question
+              </p>
+              <div className="flex items-center gap-2">
                 {Array.from({ length: CHALLENGE_QUESTION_COUNT }).map((_, i) => (
                   <span
                     key={i}
@@ -113,6 +122,7 @@ export default function ParticipantForm({
                     {i + 1}
                   </span>
                 ))}
+              </div>
               </div>
             </aside>
 

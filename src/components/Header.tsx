@@ -2,6 +2,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Menu, X } from 'lucide-react';
 import { PAGES, type PageId } from '@/types/router';
 
+// Admin stays reachable from the footer, but is hidden from the top navigation
+const NAV_PAGES = PAGES.filter((page) => page.id !== 'admin');
+
 type HeaderProps = {
   currentPage: PageId;
   onNavigate: (page: PageId) => void;
@@ -50,6 +53,9 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
         width: box.width,
         ready: true,
       });
+    } else {
+      // e.g. on the Admin page: no nav item is active, so hide the pill
+      setPill((p) => ({ ...p, ready: false }));
     }
   }, [currentPage]);
 
@@ -99,7 +105,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
                 Eva Pharma
               </span>
               <span className="mt-1 text-[10px] font-semibold text-gold-700 tracking-[0.2em] uppercase">
-                World Diabetes Day
+                Mellitofix Trio Clinical Challenge
               </span>
             </span>
           </button>
@@ -116,7 +122,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
               style={{ left: pill.left, width: pill.width, opacity: pill.ready ? 1 : 0 }}
             />
 
-            {PAGES.map((page) => {
+            {NAV_PAGES.map((page) => {
               const isActive = currentPage === page.id;
               return (
                 <button
@@ -169,7 +175,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
       {mobileOpen && (
         <nav className="md:hidden border-t border-cream-300/70 animate-slide-down">
           <div className="container-max py-4 flex flex-col gap-1.5">
-            {PAGES.map((page, i) => {
+            {NAV_PAGES.map((page, i) => {
               const isActive = currentPage === page.id;
               return (
                 <button

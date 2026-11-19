@@ -39,8 +39,10 @@ export default function ChallengePage({ onNavigate }: ChallengePageProps) {
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
+  const [times, setTimes] = useState<number[]>([]);
 
   const [score, setScore] = useState(0);
+  const [totalTimeMs, setTotalTimeMs] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
 
@@ -70,7 +72,11 @@ export default function ChallengePage({ onNavigate }: ChallengePageProps) {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       next.email = 'Please enter a valid email address.';
     }
-    if (!formData.phone.trim()) next.phone = 'Please enter your phone number.';
+    if (!formData.phone.trim()) {
+      next.phone = 'Please enter your phone number.';
+    } else if (formData.phone.replace(/\D/g, '').length < 8) {
+      next.phone = 'Please enter a valid phone number.';
+    }
     if (!formData.clinicAddress.trim()) next.clinicAddress = 'Please enter your clinic address.';
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -83,15 +89,22 @@ export default function ChallengePage({ onNavigate }: ChallengePageProps) {
 
     setChecking(true);
     setNotice(null);
-    const taken = await challengeAlreadyTaken(formData.email.trim().toLowerCase());
+    const taken = await challengeAlreadyTaken(
+      formData.email.trim().toLowerCase(),
+      formData.phone.trim()
+    );
     setChecking(false);
 
     if (taken === null) {
       setNotice('check_failed');
       return;
     }
-    if (taken) {
+    if (taken === 'email') {
       setNotice('taken');
+      return;
+    }
+    if (taken === 'phone') {
+      setNotice('phone_taken');
       return;
     }
 
@@ -99,42 +112,45 @@ export default function ChallengePage({ onNavigate }: ChallengePageProps) {
   };
 
   const handleNext = useCallback(
-    (selectedAnswer: number) => {
+    (selectedAnswer: number, timeMs: number) => {
       const updatedAnswers = [...answers, selectedAnswer];
+      const updatedTimes = [...times, timeMs];
       setAnswers(updatedAnswers);
-
-      if (selectedAnswer === questions[currentIndex].correct_answer) {
-        setScore((s) => s + 1);
-      }
+      setTimes(updatedTimes);
 
       if (currentIndex < questions.length - 1) {
         setCurrentIndex((i) => i + 1);
-      } else {
-        const finalScore =
-          updatedAnswers.reduce(
-            (acc, ans, i) => acc + (ans === questions[i].correct_answer ? 1 : 0),
-            0,
-          );
-        setScore(finalScore);
-        setPhase('results');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        setSaving(true);
-        setSaveError(false);
-        insertSubmission({
-          full_name: formData.fullName.trim(),
-          email: formData.email.trim().toLowerCase(),
-          phone: formData.phone.trim(),
-          clinic_address: formData.clinicAddress.trim(),
-          score: finalScore,
-          total_questions: questions.length,
-        }).then((ok) => {
-          setSaving(false);
-          if (!ok) setSaveError(true);
-        });
+        return;
       }
+
+      const finalScore = updatedAnswers.reduce(
+        (acc, ans, i) => acc + (ans === questions[i].correct_answer ? 1 : 0),
+        0
+      );
+      const finalTime = Math.round(updatedTimes.reduce((acc, t) => acc + t, 0));
+
+      setScore(finalScore);
+      setTotalTimeMs(finalTime);
+      setPhase('results');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      setSaving(true);
+      setSaveError(false);
+      insertSubmission({
+        full_name: formData.fullName.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
+        clinic_address: formData.clinicAddress.trim(),
+        score: finalScore,
+        total_questions: questions.length,
+        time_taken_ms: finalTime,
+      }).then((ok) => {
+        setSaving(false);
+        if (!ok) setSaveError(true);
+      });
     },
-    [answers, currentIndex, questions, formData],
+    [answers, times, currentIndex, questions, formData]
   );
 
   if (phase === 'form') {
@@ -168,6 +184,7 @@ export default function ChallengePage({ onNavigate }: ChallengePageProps) {
     <ChallengeResults
       score={score}
       total={questions.length}
+      timeTakenMs={totalTimeMs}
       fullName={formData.fullName}
       saving={saving}
       saveError={saveError}

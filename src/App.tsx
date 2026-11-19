@@ -5,6 +5,7 @@ import ChallengePage from '@/pages/ChallengePage';
 import PortfolioPage from '@/pages/PortfolioPage';
 import LeaderboardPage from '@/pages/LeaderboardPage';
 import AdminPage from '@/pages/AdminPage';
+import { useInView } from '@/hooks/useInView';
 import { PAGES, type PageId } from '@/types/router';
 
 function getPageFromHash(): PageId {
@@ -38,7 +39,7 @@ function App() {
       return <PortfolioPage />;
     case 'leaderboard':
       return <LeaderboardPage />;
-    case 'admin':
+      case 'admin':
       return <AdminPage />;
     default:
       return <HomePage onNavigate={handleNavigate} />;

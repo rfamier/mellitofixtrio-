@@ -15,6 +15,7 @@ export type Submission = {
   clinic_address: string;
   score: number;
   total_questions: number;
+  time_taken_ms: number | null;
   created_at: string;
 };
 
@@ -24,6 +25,7 @@ export type LeaderboardEntry = {
   clinic_address: string;
   score: number;
   total_questions: number;
+  time_taken_ms: number | null;
   created_at: string;
   rank: number;
 };
@@ -35,6 +37,7 @@ export type SubmissionInput = {
   clinic_address: string;
   score: number;
   total_questions: number;
+  time_taken_ms: number;
 };
 
 export type ChallengeQuestionData = {
@@ -66,6 +69,18 @@ export type ChallengeQuestionInput = {
 };
 
 export const CHALLENGE_QUESTION_COUNT = 5;
+
+/** Seconds allowed for each question */
+export const QUESTION_TIME_SECONDS = 60;
+
+/** 192000 -> "3:12" */
+export function formatDuration(ms: number | null | undefined): string {
+  if (ms == null) return '—';
+  const totalSeconds = Math.round(ms / 1000);
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
 
 // ---- Auth ----
 
@@ -99,6 +114,7 @@ export async function insertSubmission(input: SubmissionInput): Promise<Submissi
       clinic_address: input.clinic_address,
       score: input.score,
       total_questions: input.total_questions,
+      time_taken_ms: input.time_taken_ms,
     })
     .select()
     .single();
@@ -114,8 +130,9 @@ export async function insertSubmission(input: SubmissionInput): Promise<Submissi
 export async function getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
   const { data, error } = await supabase
     .from('submissions')
-    .select('id, full_name, clinic_address, score, total_questions, created_at')
+    .select('id, full_name, clinic_address, score, total_questions, time_taken_ms, created_at')
     .order('score', { ascending: false })
+    .order('time_taken_ms', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: true })
     .limit(limit);
 
@@ -133,7 +150,7 @@ export async function getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
 export async function getAllSubmissions(): Promise<Submission[]> {
   const { data, error } = await supabase
     .from('submissions')
-    .select('id, full_name, email, phone, clinic_address, score, total_questions, created_at')
+    .select('id, full_name, email, phone, clinic_address, score, total_questions, time_taken_ms, created_at')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -180,10 +197,20 @@ export async function getChallengeQuestions(): Promise<ChallengeQuestionData[]> 
   return (data || []) as ChallengeQuestionData[];
 }
 
-export async function challengeAlreadyTaken(email: string): Promise<boolean | null> {
-  const { data, error } = await supabase.rpc('challenge_already_taken', { p_email: email });
+/**
+ * Checks whether this email OR phone number has already taken the challenge.
+ * Returns 'email', 'phone', 'none', or null if the check failed.
+ */
+export async function challengeAlreadyTaken(
+  email: string,
+  phone: string
+): Promise<'email' | 'phone' | 'none' | null> {
+  const { data, error } = await supabase.rpc('challenge_already_taken', {
+    p_email: email,
+    p_phone: phone,
+  });
 
-  if (error || typeof data !== 'boolean') {
+  if (error || (data !== 'email' && data !== 'phone' && data !== 'none')) {
     console.error('Failed to check challenge attempt:', error?.message);
     return null;
   }
@@ -277,7 +304,7 @@ export async function setQuestionInChallenge(id: string, included: boolean): Pro
 // ---- CSV Export ----
 
 export function exportToCSV(submissions: Submission[]): void {
-  const headers = ['Name', 'Email', 'Phone', 'Clinic Address', 'Score', 'Total Questions', 'Date'];
+  const headers = ['Name', 'Email', 'Phone', 'Clinic Address', 'Score', 'Total Questions', 'Time Taken', 'Date'];
   const rows = submissions.map((s) => [
     s.full_name,
     s.email,
@@ -285,6 +312,7 @@ export function exportToCSV(submissions: Submission[]): void {
     s.clinic_address,
     String(s.score),
     String(s.total_questions),
+    formatDuration(s.time_taken_ms),
     new Date(s.created_at).toLocaleString(),
   ]);
 

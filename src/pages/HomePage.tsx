@@ -60,15 +60,15 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center pt-10 pb-20 lg:pt-16 lg:pb-28">
             {/* Copy */}
             <div className="lg:col-span-7">
-  <Reveal direction="up">
+  {/* <Reveal direction="up">
     <div className="inline-flex items-center gap-2 px-3 py-1 mb-7 rounded-full bg-sky-50 border border-sky-200 text-sky-800 text-xs font-semibold uppercase tracking-[0.14em]">
       <span className="relative flex w-2 h-2">
         <span className="absolute inset-0 rounded-full bg-sky-500 animate-ping opacity-60" />
         <span className="relative w-2 h-2 rounded-full bg-sky-500" />
       </span>
-      World Diabetes Day &middot; November 14
+      Mellitofix Trio Clinical Challenge &middot; November 14
     </div>
-              </Reveal>
+    </Reveal> */}
 
               <Reveal direction="up" delay={80}>
                 <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-semibold text-ink-900 leading-[1.05] mb-7">
@@ -150,7 +150,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 Ready To Join The Challenge?
               </h2>
               <p className="text-cream-300 text-lg mb-10 max-w-xl mx-auto">
-                Take the World Diabetes Day challenge and see how you rank.
+                Take the Mellitofix Trio Clinical Challenge and see how you rank.
               </p>
               <button onClick={() => onNavigate('challenge')} className="btn-gold group mx-auto">
                 Get Started

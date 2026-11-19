@@ -9,11 +9,10 @@ import {
   RefreshCw,
   type LucideIcon,
 } from 'lucide-react';
-import { getLeaderboard, type LeaderboardEntry } from '@/lib/supabase';
+import { getLeaderboard, formatDuration, type LeaderboardEntry } from '@/lib/supabase';
 import Reveal from '@/components/Reveal';
 import PageHero from '@/components/pageHero';
 import { useInView } from '@/hooks/useInView';
-
 
 export default function LeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -49,7 +48,7 @@ export default function LeaderboardPage() {
       <PageHero
         icon={Trophy}
         title="Leaderboard"
-        description="Top performers in the World Diabetes Day clinical challenge. Rankings are based on quiz scores, with ties broken by submission time."
+        description="Top performers in the World Diabetes Day clinical challenge. Rankings are based on the number of correct answers, with ties broken by the total time taken."
       />
 
       <section className="container-max py-12 lg:py-16">
@@ -101,11 +100,11 @@ export default function LeaderboardPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-cream-300 bg-cream-50/80">
-                      {['Rank', 'Name', 'Clinic', 'Score', 'Date'].map((h) => (
+                      {['Rank', 'Name', 'Clinic', 'Score', 'Time', 'Date'].map((h) => (
                         <th
                           key={h}
                           className={`px-5 py-4 text-[11px] font-semibold text-ink-400 uppercase tracking-[0.14em] ${
-                            h === 'Score' || h === 'Date' ? 'text-center' : 'text-left'
+                            h === 'Score' || h === 'Time' || h === 'Date' ? 'text-center' : 'text-left'
                           } ${h === 'Clinic' || h === 'Date' ? 'hidden sm:table-cell' : ''}`}
                         >
                           {h}
@@ -154,6 +153,11 @@ export default function LeaderboardPage() {
                               />
                             </span>
                           </div>
+                        </td>
+                        <td className="px-5 py-4 text-center">
+                          <span className="text-sm font-medium text-ink-700 tabular-nums">
+                            {formatDuration(entry.time_taken_ms)}
+                          </span>
                         </td>
                         <td className="px-5 py-4 text-center hidden sm:table-cell">
                           <span className="text-sm text-ink-400">
@@ -249,9 +253,16 @@ function Podium({ entries }: { entries: LeaderboardEntry[] }) {
               </div>
               <p className="text-sm font-semibold text-ink-900 truncate w-full">{entry.full_name}</p>
               <p className="text-xs text-ink-400 truncate w-full">{entry.clinic_address}</p>
-              <span className="mt-2 inline-flex items-center px-2.5 py-0.5 rounded-full bg-gold-50 border border-gold-200 text-xs font-semibold text-gold-800 tabular-nums">
-                {entry.score} / {entry.total_questions}
-              </span>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-gold-50 border border-gold-200 text-xs font-semibold text-gold-800 tabular-nums">
+                  {entry.score} / {entry.total_questions}
+                </span>
+                {entry.time_taken_ms != null && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-200 text-xs font-semibold text-sky-800 tabular-nums">
+                    {formatDuration(entry.time_taken_ms)}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* block */}

@@ -1,23 +1,60 @@
-import { useState } from 'react';
-import { ArrowRight, CheckCircle2, XCircle, Lightbulb } from 'lucide-react';
-import type { ChallengeQuestionData } from '@/lib/supabase';
+import { useEffect, useRef, useState } from 'react';
+import { ArrowRight, CheckCircle2, XCircle, Lightbulb, Timer } from 'lucide-react';
+import { QUESTION_TIME_SECONDS, type ChallengeQuestionData } from '@/lib/supabase';
 
 type ChallengeQuestionProps = {
   question: ChallengeQuestionData;
   index: number;
   total: number;
-  onNext: (selectedAnswer: number) => void;
+  /** selectedAnswer is -1 when time ran out without an answer; timeMs = time spent before submitting */
+  onNext: (selectedAnswer: number, timeMs: number) => void;
 };
 
 const letter = (i: number) => String.fromCharCode(65 + i);
+const LIMIT_MS = QUESTION_TIME_SECONDS * 1000;
+
+const RING_R = 20;
+const RING_C = 2 * Math.PI * RING_R;
 
 export default function ChallengeQuestion({ question, index, total, onNext }: ChallengeQuestionProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+  const [remainingMs, setRemainingMs] = useState(LIMIT_MS);
+  const [spentMs, setSpentMs] = useState<number | null>(null);
+  const startRef = useRef<number>(performance.now());
 
   const options = [question.option_a, question.option_b, question.option_c, question.option_d];
   const isLast = index === total - 1;
   const correct = question.correct_answer;
+
+  // Countdown — stops as soon as the answer is revealed
+  useEffect(() => {
+    if (revealed) return;
+    const id = window.setInterval(() => {
+      const elapsed = performance.now() - startRef.current;
+      const left = Math.max(0, LIMIT_MS - elapsed);
+      setRemainingMs(left);
+      if (left <= 0) {
+        window.clearInterval(id);
+        setSelected(null); // unanswered when time runs out
+        setTimedOut(true);
+        setSpentMs(LIMIT_MS);
+        setRevealed(true);
+      }
+    }, 200);
+    return () => window.clearInterval(id);
+  }, [revealed]);
+
+  const handleSubmit = () => {
+    if (selected === null) return;
+    setSpentMs(Math.min(LIMIT_MS, performance.now() - startRef.current));
+    setRevealed(true);
+  };
+
+  const secondsLeft = Math.ceil(remainingMs / 1000);
+  const urgent = !revealed && secondsLeft <= 10;
+  const warning = !revealed && secondsLeft <= 20 && !urgent;
 
   const optionClass = (i: number): string => {
     if (!revealed) {
@@ -42,12 +79,52 @@ export default function ChallengeQuestion({ question, index, total, onNext }: Ch
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-end justify-between gap-4 mb-3">
-          <p className="text-sm font-medium text-ink-500">
-            Question{' '}
-            <span className="font-serif text-2xl font-semibold text-ink-900 tabular-nums">{index + 1}</span>{' '}
-            of {total}
-          </p>
-          {question.category && <span className="eyebrow">{question.category}</span>}
+          <div className="flex items-end gap-3">
+            <p className="text-sm font-medium text-ink-500">
+              Question{' '}
+              <span className="font-serif text-2xl font-semibold text-ink-900 tabular-nums">{index + 1}</span>{' '}
+              of {total}
+            </p>
+            {question.category && <span className="eyebrow hidden sm:inline-flex">{question.category}</span>}
+          </div>
+
+          {/* Timer */}
+          <div
+            className={`flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-colors duration-300 ${
+              revealed
+                ? 'bg-cream-50 border-cream-300 text-ink-400'
+                : urgent
+                ? 'bg-red-50 border-red-300 text-red-600 animate-pulse'
+                : warning
+                ? 'bg-gold-50 border-gold-300 text-gold-800'
+                : 'bg-white border-cream-300 text-ink-800'
+            }`}
+            role="timer"
+            aria-live="off"
+            aria-label={`${secondsLeft} seconds left`}
+          >
+            <span className="relative w-11 h-11 flex items-center justify-center">
+              <svg viewBox="0 0 48 48" className="absolute inset-0 w-full h-full -rotate-90">
+                <circle cx="24" cy="24" r={RING_R} fill="none" stroke="currentColor" strokeOpacity="0.15" strokeWidth="4" />
+                <circle
+                  cx="24"
+                  cy="24"
+                  r={RING_R}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray={RING_C}
+                  strokeDashoffset={RING_C * (1 - remainingMs / LIMIT_MS)}
+                  style={{ transition: 'stroke-dashoffset 0.2s linear' }}
+                />
+              </svg>
+              <Timer className="w-4 h-4" />
+            </span>
+            <span className="font-serif text-xl font-semibold tabular-nums">
+              0:{String(secondsLeft).padStart(2, '0')}
+            </span>
+          </div>
         </div>
 
         {/* Segmented progress */}
@@ -64,7 +141,6 @@ export default function ChallengeQuestion({ question, index, total, onNext }: Ch
 
         {/* Card */}
         <div className="card relative overflow-hidden p-5 sm:p-6 lg:p-7 animate-slide-up">
-          {/* big faint number */}
           <span
             aria-hidden
             className="absolute top-2 right-5 font-serif italic text-[5rem] leading-none text-cream-200 select-none pointer-events-none"
@@ -104,6 +180,14 @@ export default function ChallengeQuestion({ question, index, total, onNext }: Ch
             ))}
           </div>
 
+          {/* Time's up */}
+          {timedOut && (
+            <div className="relative mt-5 flex items-center gap-2.5 p-3.5 rounded-xl border border-red-200 bg-red-50 text-sm text-red-700 animate-slide-down">
+              <Timer className="w-4 h-4 flex-shrink-0" />
+              Time's up! This question was not answered.
+            </div>
+          )}
+
           {/* Takeaway */}
           {revealed && question.takeaway.trim() && (
             <div className="relative mt-5 overflow-hidden rounded-xl border border-gold-200 bg-gradient-to-br from-gold-50 to-cream-50 p-4 pl-5 animate-slide-up">
@@ -124,14 +208,17 @@ export default function ChallengeQuestion({ question, index, total, onNext }: Ch
           <div className="relative mt-6 flex justify-end">
             {!revealed ? (
               <button
-                onClick={() => setRevealed(true)}
+                onClick={handleSubmit}
                 disabled={selected === null}
                 className="btn-primary disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
                 Submit Answer
               </button>
             ) : (
-              <button onClick={() => onNext(selected as number)} className="btn-primary group animate-pop">
+              <button
+                onClick={() => onNext(selected ?? -1, spentMs ?? LIMIT_MS)}
+                className="btn-primary group animate-pop"
+              >
                 {isLast ? 'See Results' : 'Next Question'}
                 <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
               </button>

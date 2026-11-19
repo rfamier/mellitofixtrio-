@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Award, Trophy, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { Award, Trophy, ArrowRight, AlertCircle, Loader2, Timer } from 'lucide-react';
 import Reveal from '@/components/Reveal';
+import { formatDuration } from '@/lib/supabase';
 
 type ChallengeResultsProps = {
   score: number;
   total: number;
+  timeTakenMs: number;
   fullName: string;
   saving: boolean;
   saveError: boolean;
@@ -18,6 +20,7 @@ const CONFETTI_COLORS = ['#C5A66A', '#DFC68F', '#5E94AE', '#94C2D8', '#252B2B'];
 export default function ChallengeResults({
   score,
   total,
+  timeTakenMs,
   fullName,
   saving,
   saveError,
@@ -153,6 +156,10 @@ export default function ChallengeResults({
             >
               {perfect ? 'Perfect Score' : 'Challenge Score'}
             </span>
+            <p className="relative mt-4 inline-flex items-center gap-2 text-sm text-ink-600 animate-pop [animation-delay:1.5s] ml-2">
+              <Timer className="w-4 h-4 text-gold-600" />
+              Total time <span className="font-semibold text-ink-900 tabular-nums">{formatDuration(timeTakenMs)}</span>
+            </p>
             <p className="relative mt-5 text-xs text-ink-400">The challenge can be taken once per participant.</p>
           </div>
         </Reveal>
